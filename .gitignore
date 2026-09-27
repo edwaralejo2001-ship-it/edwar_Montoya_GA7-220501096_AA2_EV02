@@ -1,4 +1,4 @@
-# Archivos y directorios de compilación Maven
+# Archivos y directorios de compilación Maven y Gradle
 target/
 pom.xml.tag
 pom.xml.releaseBackup
@@ -9,6 +9,8 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
+.gradle/
+build/
 
 # Configuración de entornos de desarrollo (IDE)
 .idea/
