@@ -11,6 +11,19 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Optional;
 
+/**
+ * Controlador de Productos e Inventario.
+ * Proyecto: EwuarSoft - Sistema de Gestión e Inventario.
+ * Evidencia SENA: GA7-220501096-AA2-EV02.
+ *
+ * Implementa las operaciones del módulo de inventario:
+ * - Catálogo de productos con indicadores de stock.
+ * - Filtros por categoría y búsqueda textual por nombre/código.
+ * - Operaciones CRUD (Crear, Leer, Actualizar, Eliminar).
+ * - Registro de movimientos de inventario (Entradas y Salidas de existencias).
+ *
+ * @author Edwar Alejandro Montoya Ramírez
+ */
 @Controller
 @RequestMapping("/productos")
 public class ProductoController {
@@ -18,11 +31,26 @@ public class ProductoController {
     private final ProductoService productoService;
     private final CategoriaService categoriaService;
 
+    /**
+     * Constructor con inyección de dependencias para los servicios de negocio requeridos.
+     * @param productoService Servicio para lógica de inventario y stock.
+     * @param categoriaService Servicio para consulta de categorías.
+     */
     public ProductoController(ProductoService productoService, CategoriaService categoriaService) {
         this.productoService = productoService;
         this.categoriaService = categoriaService;
     }
 
+    /**
+     * Lista los productos del inventario permitiendo búsqueda, filtros por categoría y filtros de stock crítico.
+     *
+     * @param query Término de búsqueda opcional (nombre o código SKU).
+     * @param categoriaId Identificador opcional de categoría para filtrado.
+     * @param filtro Criterio especial de filtrado (ej. 'bajo_stock').
+     * @param session Sesión HTTP para verificar el usuario conectado.
+     * @param model Modelo para abastecer la vista Thymeleaf.
+     * @return Vista templates/productos/lista.html.
+     */
     @GetMapping
     public String listarProductos(@RequestParam(value = "q", required = false) String query,
                                   @RequestParam(value = "categoria", required = false) Long categoriaId,
@@ -43,6 +71,7 @@ public class ProductoController {
             model.addAttribute("productos", productoService.listarTodos());
         }
 
+        // Carga de datos complementarios para filtros y badges de estado
         model.addAttribute("categorias", categoriaService.listarTodas());
         model.addAttribute("totalProductos", productoService.contarProductos());
         model.addAttribute("stockCritico", productoService.contarProductosBajoStock());
@@ -53,6 +82,13 @@ public class ProductoController {
         return "productos/lista";
     }
 
+    /**
+     * Muestra el formulario para registrar un nuevo producto en el catálogo.
+     *
+     * @param session Sesión HTTP actual.
+     * @param model Modelo con instancia vacía de Producto y lista de categorías disponibles.
+     * @return Vista templates/productos/formulario.html.
+     */
     @GetMapping("/nuevo")
     public String formularioNuevo(HttpSession session, Model model) {
         model.addAttribute("producto", new Producto());
@@ -63,6 +99,15 @@ public class ProductoController {
         return "productos/formulario";
     }
 
+    /**
+     * Procesa y almacena un nuevo producto en la base de datos MySQL vía Hibernate.
+     *
+     * @param producto Entidad producto con los datos ingresados en el formulario.
+     * @param redirectAttributes Atributos flash para mensaje de confirmación.
+     * @param model Modelo para recarga en caso de error.
+     * @param session Sesión HTTP.
+     * @return Redirección a la lista o retorno al formulario si existen fallos de validación.
+     */
     @PostMapping("/guardar")
     public String guardarProducto(@ModelAttribute("producto") Producto producto,
                                   RedirectAttributes redirectAttributes,
@@ -83,6 +128,15 @@ public class ProductoController {
         }
     }
 
+    /**
+     * Carga el producto por su identificador primario para edición.
+     *
+     * @param id Identificador numérico del producto.
+     * @param session Sesión HTTP actual.
+     * @param model Modelo para poblar campos en la vista.
+     * @param redirectAttributes Mensajes flash en caso de no encontrar el producto.
+     * @return Vista templates/productos/formulario.html configurada en modo edición.
+     */
     @GetMapping("/editar/{id}")
     public String formularioEditar(@PathVariable("id") Long id,
                                    HttpSession session,
@@ -102,6 +156,15 @@ public class ProductoController {
         return "productos/formulario";
     }
 
+    /**
+     * Procesa la actualización de los datos de un producto existente.
+     *
+     * @param producto Entidad con los datos modificados.
+     * @param redirectAttributes Mensaje flash de éxito.
+     * @param model Modelo para errores.
+     * @param session Sesión HTTP.
+     * @return Redirección a la lista de productos.
+     */
     @PostMapping("/actualizar")
     public String actualizarProducto(@ModelAttribute("producto") Producto producto,
                                      RedirectAttributes redirectAttributes,
@@ -122,6 +185,13 @@ public class ProductoController {
         }
     }
 
+    /**
+     * Elimina un producto del catálogo respetando la integridad referencial.
+     *
+     * @param id Identificador del producto a eliminar.
+     * @param redirectAttributes Mensaje de confirmación o alerta si tiene registros vinculados.
+     * @return Redirección al catálogo.
+     */
     @GetMapping("/eliminar/{id}")
     public String eliminarProducto(@PathVariable("id") Long id,
                                    RedirectAttributes redirectAttributes) {
@@ -134,6 +204,14 @@ public class ProductoController {
         return "redirect:/productos";
     }
 
+    /**
+     * Muestra la interfaz para registrar movimientos de existencias (entradas/salidas).
+     *
+     * @param productoId ID opcional para seleccionar automáticamente un producto específico.
+     * @param session Sesión de usuario actual.
+     * @param model Modelo para abastecer el listado de productos, tipos y motivos de movimiento.
+     * @return Vista templates/productos/movimiento.html.
+     */
     @GetMapping("/movimiento")
     public String formularioMovimiento(@RequestParam(value = "productoId", required = false) Long productoId,
                                        HttpSession session,
@@ -147,6 +225,19 @@ public class ProductoController {
         return "productos/movimiento";
     }
 
+    /**
+     * Procesa la entrada o salida de inventario, actualiza las existencias físicas y guarda la auditoría.
+     *
+     * @param productoId Identificador del producto afectado.
+     * @param tipoMovimiento ENTRADA o SALIDA de inventario.
+     * @param motivo Justificación del movimiento (COMPRA, VENTA, MERMA_DANO, AJUSTE, etc.).
+     * @param cantidad Cantidad física a incrementar o descontar.
+     * @param observacion Nota descriptiva opcional.
+     * @param session Sesión activa para tomar el usuario responsable.
+     * @param redirectAttributes Mensaje flash de respuesta.
+     * @param model Modelo de retorno.
+     * @return Redirección al catálogo si es exitoso o retorno al formulario en caso de insuficiencia de stock.
+     */
     @PostMapping("/movimiento")
     public String procesarMovimiento(@RequestParam("productoId") Long productoId,
                                      @RequestParam("tipoMovimiento") TipoMovimiento tipoMovimiento,
