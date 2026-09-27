@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Movimiento de Stock')}"></head>
+<body>
+
+<div class="app-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar('movimiento', ${usuarioLogueado})}"></div>
+
+    <main class="app-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+
+        <div th:replace="~{fragments/layout :: alertas}"></div>
+
+        <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+            <div>
+                <h2 class="h3 fw-bold mb-1">Registrar Movimiento de Inventario</h2>
+                <p class="text-muted mb-0">Auditoría y ajuste directo de entradas (compras) y salidas (ventas / mermas / ajustes)</p>
+            </div>
+            <a th:href="@{/productos}" class="btn-outline-custom">
+                <i class="bi bi-arrow-left"></i>
+                <span>Volver al inventario</span>
+            </a>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="content-card">
+                    <div class="content-card-header bg-white">
+                        <h5 class="card-title mb-0 fw-bold">
+                            <i class="bi bi-arrow-left-right text-warning me-2"></i>
+                            Datos del Movimiento
+                        </h5>
+                    </div>
+                    <div class="content-card-body">
+                        <form th:action="@{/productos/movimiento}" method="post">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="productoId" class="form-label fw-semibold small text-secondary">Producto Seleccionado *</label>
+                                    <select id="productoId" name="productoId" class="form-select form-select-custom" required>
+                                        <option value="" disabled th:selected="${productoSeleccionadoId == null}">-- Seleccione el producto --</option>
+                                        <option th:each="prod : ${productos}"
+                                                th:value="${prod.id}"
+                                                th:text="${prod.codigo} + ' - ' + ${prod.nombre} + ' (Stock actual: ' + ${prod.stockActual} + ')'"
+                                                th:selected="${productoSeleccionadoId != null && productoSeleccionadoId == prod.id}">
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="tipoMovimiento" class="form-label fw-semibold small text-secondary">Tipo de Movimiento *</label>
+                                    <select id="tipoMovimiento" name="tipoMovimiento" class="form-select form-select-custom" required>
+                                        <option th:each="tipo : ${tiposMovimiento}" th:value="${tipo}" th:text="${tipo.etiqueta}"></option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="motivo" class="form-label fw-semibold small text-secondary">Motivo del Movimiento *</label>
+                                    <select id="motivo" name="motivo" class="form-select form-select-custom" required>
+                                        <option th:each="mot : ${motivos}" th:value="${mot}" th:text="${mot.etiqueta}"></option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="cantidad" class="form-label fw-semibold small text-secondary">Cantidad de Unidades *</label>
+                                    <input type="number" min="1" id="cantidad" name="cantidad" class="form-control form-control-custom" placeholder="Ej: 12" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small text-secondary">Responsable del Registro</label>
+                                    <input type="text" class="form-control form-control-custom bg-light"
+                                           th:value="${usuarioLogueado != null ? usuarioLogueado.nombreCompleto : 'Sistema'}" readonly>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="observacion" class="form-label fw-semibold small text-secondary">Observaciones / Justificación</label>
+                                    <textarea id="observacion" name="observacion" class="form-control form-control-custom" rows="3" placeholder="Ej: Factura Proveedor #4561 o Ajuste de inventario físico mensual..."></textarea>
+                                </div>
+
+                                <div class="col-12 mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                                    <a th:href="@{/productos}" class="btn-outline-custom">Cancelar</a>
+                                    <button type="submit" class="btn-primary-custom">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span>Procesar Movimiento</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

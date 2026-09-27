@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Dashboard')}"></head>
+<body>
+
+<div class="app-wrapper">
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/layout :: sidebar('dashboard', ${usuarioLogueado})}"></div>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+
+        <div th:replace="~{fragments/layout :: alertas}"></div>
+
+        <!-- Dashboard Header -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <div>
+                <h2 class="h3 fw-bold mb-1">Panel de Control General</h2>
+                <p class="text-muted mb-0">
+                    Bienvenido, <strong th:text="${usuarioLogueado != null ? usuarioLogueado.nombreCompleto : 'Usuario'}">Usuario</strong>. Monitoreo en tiempo real del inventario EwuarSoft.
+                </p>
+            </div>
+            <div class="d-flex gap-2 mt-3 mt-md-0">
+                <a th:href="@{/productos/nuevo}" class="btn-primary-custom">
+                    <i class="bi bi-plus-lg"></i>
+                    <span>Nuevo Producto</span>
+                </a>
+                <a th:href="@{/productos/movimiento}" class="btn-outline-custom">
+                    <i class="bi bi-arrow-down-up"></i>
+                    <span>Entrada / Salida</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- KPI Metric Cards Grid -->
+        <div class="row g-3 mb-4">
+            <!-- Total Productos -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="metric-card primary">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="metric-label">Productos en Catálogo</div>
+                            <div class="metric-value" th:text="${totalProductos}">0</div>
+                        </div>
+                        <div class="metric-icon indigo">
+                            <i class="bi bi-boxes"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 small text-muted">
+                        <a th:href="@{/productos}" class="text-decoration-none text-primary fw-semibold">
+                            Ver catálogo completo <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clientes Registrados -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="metric-card success">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="metric-label">Total Clientes</div>
+                            <div class="metric-value" th:text="${totalClientes}">0</div>
+                        </div>
+                        <div class="metric-icon emerald">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 small text-muted">
+                        <a th:href="@{/clientes}" class="text-decoration-none text-success fw-semibold">
+                            Gestionar clientes <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerta Stock Crítico -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="metric-card danger">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="metric-label">Stock Crítico / Bajo</div>
+                            <div class="metric-value text-danger" th:text="${stockCritico}">0</div>
+                        </div>
+                        <div class="metric-icon rose">
+                            <i class="bi bi-exclamation-octagon-fill"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 small text-muted">
+                        <a th:href="@{/productos(filtro='bajo_stock')}" class="text-decoration-none text-danger fw-semibold">
+                            Revisar productos <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Valor Total Inventario -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="metric-card warning">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="metric-label">Valor del Inventario</div>
+                            <div class="metric-value" style="font-size: 1.45rem;" th:text="'$' + ${#numbers.formatDecimal(valorInventario, 0, 'POINT', 0, 'COMMA')}">$0</div>
+                        </div>
+                        <div class="metric-icon amber">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 small text-muted">
+                        <span>A precio de venta actual</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secciones de Contenido: Stock Crítico & Actividad -->
+        <div class="row g-4">
+            <!-- Tabla de Productos con Stock Crítico -->
+            <div class="col-12 col-lg-7">
+                <div class="content-card h-100">
+                    <div class="content-card-header bg-white">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-bell-fill text-danger fs-5"></i>
+                            <h5 class="card-title mb-0 fw-bold">Alertas de Reabastecimiento de Inventario</h5>
+                        </div>
+                        <span class="badge bg-danger rounded-pill" th:text="${stockCritico} + ' en alerta'">0</span>
+                    </div>
+                    <div class="content-card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table-custom mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Producto</th>
+                                        <th class="text-center">Stock Actual</th>
+                                        <th class="text-center">Stock Mínimo</th>
+                                        <th class="text-center">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${#lists.isEmpty(productosBajoStock)}">
+                                        <td colspan="5" class="text-center py-4 text-muted">
+                                            <i class="bi bi-check-circle-fill text-success fs-3 d-block mb-2"></i>
+                                            ¡Excelente! No hay productos con nivel de stock bajo en este momento.
+                                        </td>
+                                    </tr>
+                                    <tr th:each="prod : ${productosBajoStock}">
+                                        <td>
+                                            <span class="badge bg-light text-dark font-monospace border" th:text="${prod.codigo}">COD</span>
+                                        </td>
+                                        <td>
+                                            <strong th:text="${prod.nombre}">Nombre</strong><br>
+                                            <small class="text-muted" th:text="${prod.categoria.nombre}">Categoría</small>
+                                        </td>
+                                        <td class="text-center">
+                                            <span th:if="${prod.stockActual <= 0}" class="badge-custom badge-danger-subtle">
+                                                <i class="bi bi-x-circle"></i> Agotado (0)
+                                            </span>
+                                            <span th:if="${prod.stockActual > 0}" class="badge-custom badge-warning-subtle">
+                                                <i class="bi bi-exclamation-triangle"></i> <span th:text="${prod.stockActual}">0</span>
+                                            </span>
+                                        </td>
+                                        <td class="text-center text-muted fw-semibold" th:text="${prod.stockMinimo}">0</td>
+                                        <td class="text-center">
+                                            <a th:href="@{/productos/movimiento(productoId=${prod.id})}" class="btn btn-sm btn-outline-primary" title="Ingresar stock">
+                                                <i class="bi bi-plus-circle"></i> Reponer
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de Accesos Rápidos y Resumen -->
+            <div class="col-12 col-lg-5">
+                <div class="content-card mb-4">
+                    <div class="content-card-header bg-white">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-lightning-charge-fill text-warning fs-5"></i>
+                            <h5 class="card-title mb-0 fw-bold">Accesos Rápidos</h5>
+                        </div>
+                    </div>
+                    <div class="content-card-body">
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/productos/nuevo}" class="btn btn-light border text-start p-3 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-3 bg-primary-subtle p-2 text-primary">
+                                        <i class="bi bi-plus-square-fill fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">Registrar Producto</div>
+                                        <div class="text-muted small">Añadir nuevo producto al catálogo</div>
+                                    </div>
+                                </div>
+                                <i class="bi bi-chevron-right text-muted"></i>
+                            </a>
+
+                            <a th:href="@{/clientes/nuevo}" class="btn btn-light border text-start p-3 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-3 bg-success-subtle p-2 text-success">
+                                        <i class="bi bi-person-plus-fill fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">Registrar Cliente</div>
+                                        <div class="text-muted small">Crear ficha de cliente en el sistema</div>
+                                    </div>
+                                </div>
+                                <i class="bi bi-chevron-right text-muted"></i>
+                            </a>
+
+                            <a th:href="@{/usuarios}" class="btn btn-light border text-start p-3 d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-3 bg-info-subtle p-2 text-info">
+                                        <i class="bi bi-shield-lock-fill fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">Administrar Usuarios</div>
+                                        <div class="text-muted small">Gestionar credenciales, roles y accesos</div>
+                                    </div>
+                                </div>
+                                <i class="bi bi-chevron-right text-muted"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta Info Base de Datos XAMPP -->
+                <div class="content-card">
+                    <div class="content-card-body bg-light rounded-bottom">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <i class="bi bi-database-fill-check text-success fs-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-0">Base de Datos Conectada</h6>
+                                <span class="text-muted small">MySQL XAMPP &bull; <code>ewuarsoft_app_db</code></span>
+                            </div>
+                        </div>
+                        <p class="text-muted small mb-0 mt-2">
+                            Persistencia gestionada automáticamente por <strong>Hibernate ORM</strong> y <strong>Spring Data JPA</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

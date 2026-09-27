@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head(${esEdicion} ? 'Editar Usuario' : 'Nuevo Usuario')}"></head>
+<body>
+
+<div class="app-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar('usuarios', ${usuarioLogueado})}"></div>
+
+    <main class="app-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+
+        <div th:replace="~{fragments/layout :: alertas}"></div>
+
+        <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+            <div>
+                <h2 class="h3 fw-bold mb-1" th:text="${esEdicion} ? 'Editar Usuario del Sistema' : 'Registrar Nuevo Usuario'">Usuario</h2>
+                <p class="text-muted mb-0">Diligencie la información para otorgar o modificar accesos en EwuarSoft</p>
+            </div>
+            <a th:href="@{/usuarios}" class="btn-outline-custom">
+                <i class="bi bi-arrow-left"></i>
+                <span>Volver a la lista</span>
+            </a>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="content-card">
+                    <div class="content-card-header bg-white">
+                        <h5 class="card-title mb-0 fw-bold">
+                            <i class="bi bi-person-fill-gear text-primary me-2"></i>
+                            Datos de la Cuenta
+                        </h5>
+                    </div>
+                    <div class="content-card-body">
+                        <form th:action="${esEdicion} ? @{/usuarios/actualizar} : @{/usuarios/guardar}" th:object="${usuario}" method="post">
+                            <input type="hidden" th:field="*{id}" th:if="${esEdicion}">
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="nombreCompleto" class="form-label fw-semibold small text-secondary">Nombre Completo *</label>
+                                    <input type="text" id="nombreCompleto" th:field="*{nombreCompleto}" class="form-control form-control-custom" placeholder="Ej: Edwar Montoya" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="username" class="form-label fw-semibold small text-secondary">Nombre de Usuario (Login) *</label>
+                                    <input type="text" id="username" th:field="*{username}" class="form-control form-control-custom" placeholder="Ej: emontoya" th:readonly="${esEdicion}" required>
+                                    <small th:if="${esEdicion}" class="text-muted">El nombre de usuario no se puede cambiar después de creado.</small>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label fw-semibold small text-secondary">Correo Electrónico</label>
+                                    <input type="email" id="email" th:field="*{email}" class="form-control form-control-custom" placeholder="correo@empresa.com">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="password" class="form-label fw-semibold small text-secondary">
+                                        Contraseña <span th:if="${!esEdicion}">*</span>
+                                    </label>
+                                    <input type="password" id="password" th:field="*{password}" class="form-control form-control-custom"
+                                           th:placeholder="${esEdicion} ? 'Dejar en blanco para mantener la actual' : 'Ingrese clave segura'"
+                                           th:required="${!esEdicion}">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="rol" class="form-label fw-semibold small text-secondary">Rol de Acceso *</label>
+                                    <select id="rol" th:field="*{rol}" class="form-select form-select-custom" required>
+                                        <option th:each="r : ${roles}" th:value="${r}" th:text="${r.etiqueta}"></option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="estado" class="form-label fw-semibold small text-secondary">Estado de Cuenta *</label>
+                                    <select id="estado" th:field="*{estado}" class="form-select form-select-custom" required>
+                                        <option th:each="e : ${estados}" th:value="${e}" th:text="${e.etiqueta}"></option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12 mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                                    <a th:href="@{/usuarios}" class="btn-outline-custom">Cancelar</a>
+                                    <button type="submit" class="btn-primary-custom">
+                                        <i class="bi bi-save2-fill"></i>
+                                        <span th:text="${esEdicion} ? 'Guardar Cambios' : 'Registrar Usuario'">Guardar</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

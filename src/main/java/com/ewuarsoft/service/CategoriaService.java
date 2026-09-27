@@ -1,0 +1,26 @@
+package com.ewuarsoft.service;
+
+import com.ewuarsoft.model.Categoria;
+import com.ewuarsoft.repository.CategoriaRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class CategoriaService {
+
+    private final CategoriaRepository categoriaRepository;
+
+    public CategoriaService(CategoriaRepository categoriaRepository) {
+        this.categoriaRepository = categoriaRepository;
+    }
+
+    public List<Categoria> listarTodas() {
+        return categoriaRepository.findAll();
+    }
+
+    public Optional<Categoria> buscarPorId(Long id) {
+        return categoriaRepository.findById(id);
+    }
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="html_head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo} + ' | EwuarSoft Inventario'">EwuarSoft</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom CSS+ -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+    <!-- Sidebar Fragment -->
+    <aside th:fragment="sidebar(paginaActiva, usuario)" class="app-sidebar">
+        <div class="sidebar-header">
+            <div class="brand-icon-box">
+                <i class="bi bi-box-seam-fill"></i>
+            </div>
+            <div>
+                <h4 class="brand-name">EwuarSoft</h4>
+                <span class="brand-badge">Sistema v1.0</span>
+            </div>
+        </div>
+
+        <div class="sidebar-menu">
+            <div class="menu-heading">Principal</div>
+            <a th:href="@{/dashboard}" class="nav-link-custom" th:classappend="${paginaActiva == 'dashboard' ? 'active' : ''}">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <div class="menu-heading">Gestión Comercial</div>
+            <a th:href="@{/productos}" class="nav-link-custom" th:classappend="${paginaActiva == 'productos' ? 'active' : ''}">
+                <i class="bi bi-boxes"></i>
+                <span>Productos & Stock</span>
+            </a>
+            <a th:href="@{/productos/movimiento}" class="nav-link-custom" th:classappend="${paginaActiva == 'movimiento' ? 'active' : ''}">
+                <i class="bi bi-arrow-left-right"></i>
+                <span>Movimiento de Stock</span>
+            </a>
+            <a th:href="@{/clientes}" class="nav-link-custom" th:classappend="${paginaActiva == 'clientes' ? 'active' : ''}">
+                <i class="bi bi-people-fill"></i>
+                <span>Clientes</span>
+            </a>
+
+            <div class="menu-heading">Administración</div>
+            <a th:href="@{/usuarios}" class="nav-link-custom" th:classappend="${paginaActiva == 'usuarios' ? 'active' : ''}">
+                <i class="bi bi-person-badge-fill"></i>
+                <span>Usuarios del Sistema</span>
+            </a>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-profile-card">
+                <div class="user-avatar" th:text="${usuario != null ? #strings.substring(usuario.nombreCompleto, 0, 1) : 'U'}">
+                    U
+                </div>
+                <div class="user-details">
+                    <p class="user-name" th:text="${usuario != null ? usuario.nombreCompleto : 'Invitado'}">Usuario</p>
+                    <span class="user-role-badge" th:text="${usuario != null && usuario.rol != null ? usuario.rol.etiqueta : 'Usuario'}">Rol</span>
+                </div>
+                <a th:href="@{/logout}" class="btn-logout" title="Cerrar sesión">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Top Mobile Bar Fragment -->
+    <header th:fragment="topbar" class="d-lg-none bg-dark text-white p-3 d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-box-seam-fill text-primary fs-4"></i>
+            <span class="fw-bold fs-5">EwuarSoft</span>
+        </div>
+        <button id="sidebarToggle" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-list fs-5"></i>
+        </button>
+    </header>
+
+    <!-- Global Alerts Fragment -->
+    <div th:fragment="alertas" class="mb-3">
+        <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <div th:text="${mensajeExito}">Operación exitosa</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <div th:text="${mensajeError}">Ocurrió un error</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <!-- Scripts Fragment -->
+    <div th:fragment="scripts">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script th:src="@{/js/app.js}"></script>
+    </div>
+
+</body>
+</html>

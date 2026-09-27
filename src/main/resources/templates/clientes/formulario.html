@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head(${esEdicion} ? 'Editar Cliente' : 'Nuevo Cliente')}"></head>
+<body>
+
+<div class="app-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar('clientes', ${usuarioLogueado})}"></div>
+
+    <main class="app-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+
+        <div th:replace="~{fragments/layout :: alertas}"></div>
+
+        <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+            <div>
+                <h2 class="h3 fw-bold mb-1" th:text="${esEdicion} ? 'Editar Información del Cliente' : 'Registrar Nuevo Cliente'">Cliente</h2>
+                <p class="text-muted mb-0">Complete los datos personales y de contacto del cliente</p>
+            </div>
+            <a th:href="@{/clientes}" class="btn-outline-custom">
+                <i class="bi bi-arrow-left"></i>
+                <span>Volver al listado</span>
+            </a>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="content-card">
+                    <div class="content-card-header bg-white">
+                        <h5 class="card-title mb-0 fw-bold">
+                            <i class="bi bi-person-lines-fill text-success me-2"></i>
+                            Ficha de Información del Cliente
+                        </h5>
+                    </div>
+                    <div class="content-card-body">
+                        <form th:action="${esEdicion} ? @{/clientes/actualizar} : @{/clientes/guardar}" th:object="${cliente}" method="post">
+                            <input type="hidden" th:field="*{id}" th:if="${esEdicion}">
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="documento" class="form-label fw-semibold small text-secondary">Documento / Cédula / NIT *</label>
+                                    <input type="text" id="documento" th:field="*{documento}" class="form-control form-control-custom" placeholder="Ej: 1020304050" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="nombre" class="form-label fw-semibold small text-secondary">Nombre Completo o Razón Social *</label>
+                                    <input type="text" id="nombre" th:field="*{nombre}" class="form-control form-control-custom" placeholder="Ej: Laura Ramírez Duque" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="telefono" class="form-label fw-semibold small text-secondary">Teléfono / Celular</label>
+                                    <input type="text" id="telefono" th:field="*{telefono}" class="form-control form-control-custom" placeholder="Ej: 3101234567">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label fw-semibold small text-secondary">Correo Electrónico</label>
+                                    <input type="email" id="email" th:field="*{email}" class="form-control form-control-custom" placeholder="cliente@correo.com">
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="direccion" class="form-label fw-semibold small text-secondary">Dirección de Domicilio o Entrega</label>
+                                    <input type="text" id="direccion" th:field="*{direccion}" class="form-control form-control-custom" placeholder="Ej: Calle 50 # 45-20, Apto 301">
+                                </div>
+
+                                <div class="col-12 mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                                    <a th:href="@{/clientes}" class="btn-outline-custom">Cancelar</a>
+                                    <button type="submit" class="btn-primary-custom">
+                                        <i class="bi bi-check2-circle"></i>
+                                        <span th:text="${esEdicion} ? 'Actualizar Cliente' : 'Guardar Cliente'">Guardar</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

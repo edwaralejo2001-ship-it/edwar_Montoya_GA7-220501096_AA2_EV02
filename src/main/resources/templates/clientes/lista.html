@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: html_head('Gestión de Clientes')}"></head>
+<body>
+
+<div class="app-wrapper">
+    <div th:replace="~{fragments/layout :: sidebar('clientes', ${usuarioLogueado})}"></div>
+
+    <main class="app-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+
+        <div th:replace="~{fragments/layout :: alertas}"></div>
+
+        <!-- Top Header -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <div>
+                <h2 class="h3 fw-bold mb-1">Módulo de Clientes</h2>
+                <p class="text-muted mb-0">Directorio y gestión comercial de clientes en EwuarSoft</p>
+            </div>
+            <div>
+                <a th:href="@{/clientes/nuevo}" class="btn-primary-custom">
+                    <i class="bi bi-person-plus-fill"></i>
+                    <span>Nuevo Cliente</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="content-card mb-4">
+            <div class="content-card-body p-3">
+                <form th:action="@{/clientes}" method="get" class="row g-2 align-items-center">
+                    <div class="col-12 col-md-9">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-search"></i></span>
+                            <input type="text" name="q" th:value="${busqueda}" class="form-control form-control-custom border-start-0" placeholder="Buscar cliente por nombre o documento/cédula...">
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <button type="submit" class="btn btn-primary-custom w-100 justify-content-center">
+                            <span>Buscar</span>
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-1" th:if="${busqueda != null && !busqueda.isEmpty()}">
+                        <a th:href="@{/clientes}" class="btn btn-outline-secondary w-100 text-center" title="Limpiar filtro">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="content-card">
+            <div class="content-card-header bg-white">
+                <h5 class="card-title mb-0 fw-bold">Directorio de Clientes</h5>
+                <span class="badge bg-secondary" th:text="${#lists.size(clientes)} + ' clientes'">0</span>
+            </div>
+            <div class="content-card-body p-0">
+                <div class="table-responsive">
+                    <table class="table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Documento / NIT</th>
+                                <th>Nombre Completo</th>
+                                <th>Teléfono</th>
+                                <th>Correo Electrónico</th>
+                                <th>Dirección</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(clientes)}">
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    No se encontraron clientes registrados con los criterios especificados.
+                                </td>
+                            </tr>
+                            <tr th:each="cli : ${clientes}">
+                                <td>
+                                    <span class="badge bg-light text-dark font-monospace border" th:text="${cli.documento}">12345678</span>
+                                </td>
+                                <td>
+                                    <strong class="text-dark" th:text="${cli.nombre}">Nombre Cliente</strong>
+                                </td>
+                                <td>
+                                    <span th:if="${cli.telefono != null && !cli.telefono.isEmpty()}">
+                                        <i class="bi bi-telephone text-muted me-1"></i> <span th:text="${cli.telefono}">3001234567</span>
+                                    </span>
+                                    <span th:unless="${cli.telefono != null && !cli.telefono.isEmpty()}" class="text-muted small">Sin teléfono</span>
+                                </td>
+                                <td>
+                                    <span th:if="${cli.email != null && !cli.email.isEmpty()}" class="text-muted">
+                                        <i class="bi bi-envelope text-muted me-1"></i> <span th:text="${cli.email}">correo@cliente.com</span>
+                                    </span>
+                                    <span th:unless="${cli.email != null && !cli.email.isEmpty()}" class="text-muted small">Sin correo</span>
+                                </td>
+                                <td class="text-muted" th:text="${cli.direccion != null && !cli.direccion.isEmpty() ? cli.direccion : 'Sin dirección'}">Dirección</td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/clientes/editar/{id}(id=${cli.id})}" class="btn btn-outline-primary" title="Editar cliente">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a th:href="@{/clientes/eliminar/{id}(id=${cli.id})}"
+                                           class="btn btn-outline-danger"
+                                           onclick="return confirm('¿Está seguro de eliminar este cliente?');"
+                                           title="Eliminar cliente">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
